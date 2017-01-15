@@ -16,7 +16,7 @@ import sys
 K.set_image_dim_ordering("tf")
 
 BATCH_SIZE = 64
-EPOCHS = 10
+EPOCHS = 50
 
 DEBUGING_FLAG = False
 
@@ -57,6 +57,8 @@ def get_batch(data):
     indices = np.random.choice(len(data), BATCH_SIZE)
     return data.sample(n=BATCH_SIZE)
 
+
+
 def randomize_image(data, value):
     """
     Randomize between left, center and right image
@@ -76,6 +78,27 @@ def randomize_image(data, value):
 
     return path_file,shift_ang
 
+
+def trans_image(image,steer,trans_range = 100):
+    # Translation
+    tr_x = trans_range*np.random.uniform()-trans_range/2
+    steer_ang = steer + tr_x/trans_range*2*.2
+    tr_y = 0
+    Trans_M = np.float32([[1,0,tr_x],[0,1,tr_y]])
+    image_tr = cv2.warpAffine(image,Trans_M,(320,75))
+    return image_tr,steer_ang
+
+def trans_image_old(image,steer,trans_range=100):
+    # Translation
+    tr_x = trans_range*np.random.uniform()-trans_range/2
+    steer_ang = steer + tr_x/trans_range*2*.2
+    tr_y = 40*np.random.uniform()-40/2
+    #tr_y = 0
+    Trans_M = np.float32([[1,0,tr_x],[0,1,tr_y]])
+    image_tr = cv2.warpAffine(image,Trans_M,(320,75))
+
+    return image_tr,steer_ang
+
 def generate_train(data):
     """
     Train data generator
@@ -91,10 +114,11 @@ def generate_train(data):
             x = process_img(x)
 
             x = x.reshape(x.shape[0], x.shape[1], 3)
-            features[i] = x
 
             # Add shift to steer
             y = float(data['steer'][value]) + shift
+
+            x, y = trans_image(x,y)
 
             random = np.random.randint(1)
 
@@ -105,6 +129,7 @@ def generate_train(data):
                 y = -y
 
             labels[i] = y
+            features[i] = x
 
         x = np.array(features)
         y = np.array(labels)
@@ -132,7 +157,7 @@ def remove_low_steering(data):
     rows = []
     for i in ind:
         random = np.random.randint(10)
-        if random < 7:
+        if random < 8:
             rows.append(i)
 
     data = data.drop(data.index[rows])
@@ -184,8 +209,8 @@ def nvidia(img):
 # 2 = right
 # 3 = steering angle
 
-for i in range(5):
-    # Train the whole thing 5 times
+for i in range(1):
+    # Train the network x times
     # Load data
     data = pd.read_csv(LABEL_PATH, index_col=False)
     data.columns = ['center', 'left', 'right', 'steer', 'throttle', 'brake', 'speed']
@@ -194,7 +219,7 @@ for i in range(5):
 
     model = nvidia(img.shape)
     model.summary()
-    model.compile(optimizer=Adam(lr=1e-4), loss='mean_squared_error')
+    model.compile(optimizer=Adam(lr=0.00005), loss='mean_squared_error')
 
     # Shuffle data
     data_shuffle = data.reindex(np.random.permutation(data.index))
@@ -216,9 +241,9 @@ for i in range(5):
     model_rep = model.to_json()
 
     # Save data
-    with open('model-' + str(i) + '.json', 'w') as f:
+    with open('model.json', 'w') as f:
         json.dump(model_rep, f)
 
-        model.save_weights('./model-'+ str(i) +'.h5')
+        model.save_weights('./model.h5')
 
         print("It's saved now")
