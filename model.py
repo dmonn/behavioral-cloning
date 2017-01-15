@@ -80,23 +80,17 @@ def randomize_image(data, value):
 
 
 def trans_image(image,steer,trans_range = 100):
+    """
+    Translation function provided by Vivek Yadav
+    to augment the steering angles and images randomly
+    and avoid overfitting
+    """
     # Translation
     tr_x = trans_range*np.random.uniform()-trans_range/2
     steer_ang = steer + tr_x/trans_range*2*.2
     tr_y = 0
     Trans_M = np.float32([[1,0,tr_x],[0,1,tr_y]])
     image_tr = cv2.warpAffine(image,Trans_M,(320,75))
-    return image_tr,steer_ang
-
-def trans_image_old(image,steer,trans_range=100):
-    # Translation
-    tr_x = trans_range*np.random.uniform()-trans_range/2
-    steer_ang = steer + tr_x/trans_range*2*.2
-    tr_y = 40*np.random.uniform()-40/2
-    #tr_y = 0
-    Trans_M = np.float32([[1,0,tr_x],[0,1,tr_y]])
-    image_tr = cv2.warpAffine(image,Trans_M,(320,75))
-
     return image_tr,steer_ang
 
 def generate_train(data):
@@ -219,7 +213,7 @@ for i in range(1):
 
     model = nvidia(img.shape)
     model.summary()
-    model.compile(optimizer=Adam(lr=0.00005), loss='mean_squared_error')
+    model.compile(optimizer=Adam(lr=0.001), loss='mean_squared_error')
 
     # Shuffle data
     data_shuffle = data.reindex(np.random.permutation(data.index))
