@@ -29,9 +29,60 @@ The data which is loaded directly from my drive is feed into a Keras `fit_genera
 
 I'm using a model based on [Nvidia's paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). To reduce overfitting, I have added several dropout layers to the network.
 
+The network consists of five convolutional layers, followed by three fully connected layers. I have added Dropout Layers and SpatialDropout Layers to prevent overfitting. The `model.summary()` command prints the following output:
+
+```
+____________________
+Layer (type)                     Output Shape          Param #     Connected to
+====================================================================================================
+lambda_1 (Lambda)                (None, 66, 200, 3)    0           lambda_input_1[0][0]
+____________________________________________________________________________________________________
+lambda_2 (Lambda)                (None, 66, 200, 3)    0           lambda_1[0][0]
+____________________________________________________________________________________________________
+convolution2d_1 (Convolution2D)  (None, 33, 100, 24)   1824        lambda_2[0][0]
+____________________________________________________________________________________________________
+spatialdropout2d_1 (SpatialDropo (None, 33, 100, 24)   0           convolution2d_1[0][0]
+____________________________________________________________________________________________________
+convolution2d_2 (Convolution2D)  (None, 17, 50, 36)    21636       spatialdropout2d_1[0][0]
+____________________________________________________________________________________________________
+spatialdropout2d_2 (SpatialDropo (None, 17, 50, 36)    0           convolution2d_2[0][0]
+____________________________________________________________________________________________________
+convolution2d_3 (Convolution2D)  (None, 7, 23, 48)     43248       spatialdropout2d_2[0][0]
+____________________________________________________________________________________________________
+spatialdropout2d_3 (SpatialDropo (None, 7, 23, 48)     0           convolution2d_3[0][0]
+____________________________________________________________________________________________________
+convolution2d_4 (Convolution2D)  (None, 5, 21, 64)     27712       spatialdropout2d_3[0][0]
+____________________________________________________________________________________________________
+spatialdropout2d_4 (SpatialDropo (None, 5, 21, 64)     0           convolution2d_4[0][0]
+____________________________________________________________________________________________________
+convolution2d_5 (Convolution2D)  (None, 3, 19, 64)     36928       spatialdropout2d_4[0][0]
+____________________________________________________________________________________________________
+spatialdropout2d_5 (SpatialDropo (None, 3, 19, 64)     0           convolution2d_5[0][0]
+____________________________________________________________________________________________________
+flatten_1 (Flatten)              (None, 3648)          0           spatialdropout2d_5[0][0]
+____________________________________________________________________________________________________
+dropout_1 (Dropout)              (None, 3648)          0           flatten_1[0][0]
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 100)           364900      dropout_1[0][0]
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 50)            5050        dense_1[0][0]
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 10)            510         dense_2[0][0]
+____________________________________________________________________________________________________
+dropout_2 (Dropout)              (None, 10)            0           dense_3[0][0]
+____________________________________________________________________________________________________
+dense_4 (Dense)                  (None, 1)             11          dropout_2[0][0]
+====================================================================================================
+Total params: 501,819
+Trainable params: 501,819
+Non-trainable params: 0
+____________________________________________________________________________________________________
+
+```
+
 I'm using lambda layers to normalize the data and resize it. This has the effect that I don't need to add these things in *drive.py* because they are already included in the network itself.
 
-I'm using an Adam optimizer with a learning rate 0.0001. This very small learning rate allows me to get a generalized result over 10 epochs. Running the network for more than 10 epochs didn't have a lot of effect.
+I'm using an Adam optimizer with a learning rate 0.001. This very small learning rate allows me to get a generalized result over 50 epochs.
 
 ## Testing / Autonomous Driving
 
