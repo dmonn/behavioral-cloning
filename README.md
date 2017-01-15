@@ -29,6 +29,8 @@ The data which is loaded directly from my drive is feed into a Keras `fit_genera
 
 I'm using a model based on [Nvidia's paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). To reduce overfitting, I have added several dropout layers to the network.
 
+![Network](https://raw.githubusercontent.com/dmonn/behavioral-cloning/master/model-visualization.png?token=AGHDd-jb9QsCb1Rw-pTEwTTm7wknuCmyks5YhQ0LwA%3D%3D "Network Visualization")
+
 The network consists of five convolutional layers, followed by three fully connected layers. I have added Dropout Layers and SpatialDropout Layers to prevent overfitting. The `model.summary()` command prints the following output:
 
 ```
@@ -90,4 +92,8 @@ After my model always had a different behaviour after re-training, even though I
 
 To test out all the weights, I trained the model a lot of time (about 8 times per change) and then choose the best performing model.
 
-After the first submission, I added a translation function and played around with the learning rate. The car now drives fully autonomously without leaving the lane.
+## Second Submission
+
+After the first submission, I added a translation function, provided by Vivek Yadav and increased  the learning rate. I removed the vertical cutting, so that I only cut from top and bottom, to add more detail to the camera images.
+
+ The car now drives fully autonomously without leaving the lane.
